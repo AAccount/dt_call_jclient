@@ -1,6 +1,8 @@
 package dt.jclient;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -108,6 +110,7 @@ public class Main implements Runnable
 				System.out.println("****************************");
 				System.out.println("Call simulator options");
 				System.out.println("mk: Make call");
+				System.out.println("ogg: Make a call and play an ogg file simulating call");
 				System.out.println("l: Lookup user");
 				System.out.println("q: quit");
 				System.out.println("d: direct command");
@@ -133,6 +136,37 @@ public class Main implements Runnable
 						{
 							wait();
 						}					
+					}
+				}
+				else if (choice.equals("ogg"))
+				{//almost the same as "mk". makes things easier that i don't have to get 2 cell phones going
+					System.out.print("Call who? ");
+					String who = Utils.kbBuffer.readLine();
+					String request = Utils.cap + Utils.getTimestamp() + "|call|" + who + "|" + Utils.sessionid;
+					System.out.println("Call request: " + request);
+					System.out.print("Ogg audio only file with vorbis encoding: ");
+					String filepath = Utils.kbBuffer.readLine();
+					try
+					{
+						Utils.ogg = new FileInputStream(filepath);
+						Utils.cmd.getOutputStream().write(request.getBytes());
+						Utils.callWith = who;
+						Utils.state = CallState.INIT;	
+						
+						while(Utils.state != CallState.NONE)
+						{//don't show the menu if there's a call
+							System.out.println("Calling...");
+							synchronized(this)
+							{
+								wait();
+							}					
+						}
+						Utils.ogg = null; //needed for CmdListener to distinguish which media writer... see CmdListener
+						
+					}
+					catch (FileNotFoundException  | SecurityException ex)
+					{
+						System.out.println("Can't read the file because it's not there or not allowed to");
 					}
 				}
 				else if (choice.equals("l"))

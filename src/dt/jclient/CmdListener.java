@@ -149,10 +149,20 @@ public class CmdListener implements Runnable
 							Thread callReadThread = new Thread(callRead);
 							callReadThread.start();
 							
-							System.out.println("Starting media writer");
-							MediaWriter callWrite = new MediaWriter();
-							Thread callWriteThread = new Thread(callWrite);
-							callWriteThread.start();
+							if(Utils.ogg != null)
+							{
+								System.out.println("Starting media wrtier (OGG MODE");
+								MediaWriterOgg oggWrite = new MediaWriterOgg();
+								Thread oggWriteThread = new Thread(oggWrite);
+								oggWriteThread.start();
+							}
+							else
+							{
+								System.out.println("Starting media writer (TEXT MODE)");
+								MediaWriter callWrite = new MediaWriter();
+								Thread callWriteThread = new Thread(callWrite);
+								callWriteThread.start();
+							}
 						}
 						else
 						{

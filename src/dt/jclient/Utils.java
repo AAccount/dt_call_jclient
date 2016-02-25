@@ -26,6 +26,7 @@ public class Utils
 	public static final String cap = "G";
 	public static final String nobody = "(nobody)";
 	public static final String certPath = "/home/Daniel/Documents/untitled_folder/public.pem";
+	public static final int bufferSize = 4096;
 	
 	//session information
 	public static long sessionid;
@@ -36,7 +37,7 @@ public class Utils
 	//session call variables
 	public static CallState state= CallState.NONE;
 	public static String callWith = nobody;
-	
+	public static FileInputStream ogg = null;
 	public static Main menu;
 	public static BufferedReader kbBuffer = new BufferedReader(new InputStreamReader(System.in));
 
