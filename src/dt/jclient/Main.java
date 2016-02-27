@@ -146,8 +146,10 @@ public class Main implements Runnable
 					System.out.println("Call request: " + request);
 					System.out.print("Ogg audio only file with vorbis encoding: ");
 					String filepath = Utils.kbBuffer.readLine();
+					filepath = filepath.replace("'", "").trim();
 					try
 					{
+						System.out.println("Using file: " + filepath + " for call audio");
 						Utils.ogg = new FileInputStream(filepath);
 						Utils.cmd.getOutputStream().write(request.getBytes());
 						Utils.callWith = who;

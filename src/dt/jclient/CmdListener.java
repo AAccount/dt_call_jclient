@@ -151,7 +151,7 @@ public class CmdListener implements Runnable
 							
 							if(Utils.ogg != null)
 							{
-								System.out.println("Starting media wrtier (OGG MODE");
+								System.out.println("Starting media wrtier (OGG MODE)");
 								MediaWriterOgg oggWrite = new MediaWriterOgg();
 								Thread oggWriteThread = new Thread(oggWrite);
 								oggWriteThread.start();

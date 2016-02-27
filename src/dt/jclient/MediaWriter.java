@@ -1,6 +1,6 @@
 package dt.jclient;
 
-import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 
 //write simulated call data to media port.
@@ -8,12 +8,12 @@ import java.io.IOException;
 public class MediaWriter implements Runnable 
 {
 
-	private BufferedOutputStream buff;
+	private DataOutputStream oggOut;
 	public MediaWriter()
 	{
 		try
 		{
-			buff = new BufferedOutputStream(Utils.media.getOutputStream());
+			oggOut = new DataOutputStream(Utils.media.getOutputStream());
 		} 
 		catch (IOException e)
 		{
@@ -32,8 +32,8 @@ public class MediaWriter implements Runnable
 				System.out.print("Say to " + Utils.callWith + ": ");
 				String isay = Utils.kbBuffer.readLine();
 				String sayWCap = Utils.cap + isay;
-				buff.write(sayWCap.getBytes());
-				buff.flush();
+				oggOut.write(sayWCap.getBytes());
+				oggOut.flush();
 				
 				//for simulation purposes the magic phrase "ENDITNOW" will simulate a call end
 				//for call ending, it is the client's responsibility to set itself back into the

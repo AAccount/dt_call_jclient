@@ -35,12 +35,15 @@ public class MediaWriterOgg implements Runnable
 				buff.flush();
 				if(read < Utils.bufferSize) //not enough bytes in the file to fill the buffer... must be the end of the file
 				{
+					System.out.print("Type anything to end the call");
+					Utils.kbBuffer.readLine();
+					System.out.println("");
 					//tell the server to end the call
 					String endit = Utils.cap + Utils.getTimestamp() + "|end|" + Utils.callWith + "|" + Utils.sessionid;
 					Utils.cmd.getOutputStream().write(endit.getBytes());
 					
 					//set internals to no call state
-					System.out.println("Special jclient ENDITNOW received");
+					System.out.println("End of the file. Hanging up.");
 					Utils.callWith = Utils.nobody;
 					Utils.state = CallState.NONE;
 					
@@ -55,6 +58,7 @@ public class MediaWriterOgg implements Runnable
 					{
 						Utils.menu.notify();
 					}
+					
 				}
 			} 
 			catch (IOException e)
