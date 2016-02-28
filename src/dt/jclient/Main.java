@@ -144,6 +144,8 @@ public class Main implements Runnable
 					String who = Utils.kbBuffer.readLine();
 					String request = Utils.cap + Utils.getTimestamp() + "|call|" + who + "|" + Utils.sessionid;
 					System.out.println("Call request: " + request);
+					System.out.println("=========================IMPORTANT INFO=========================");
+					System.out.println("Ogg file MUST be stereo, 44100hz sample rate to match aclient's assumptions");
 					System.out.print("Ogg audio only file with vorbis encoding: ");
 					String filepath = Utils.kbBuffer.readLine();
 					filepath = filepath.replace("'", "").trim();
