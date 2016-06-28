@@ -109,8 +109,7 @@ public class Main implements Runnable
 				
 				System.out.println("****************************");
 				System.out.println("Call simulator options");
-				System.out.println("mk: Make call");
-				System.out.println("ogg: Make a call and play an ogg file simulating call");
+				System.out.println("a: Simulate a call using an audio file as voice data");
 				System.out.println("l: Lookup user");
 				System.out.println("q: quit");
 				System.out.println("d: direct command");
@@ -119,61 +118,65 @@ public class Main implements Runnable
 				System.out.print("> ");
 				String choice = Utils.kbBuffer.readLine();
 				
-				if(choice.equals("mk"))
-				{
-					System.out.print("Call who? ");
-					String who = Utils.kbBuffer.readLine();
-					String request = Utils.cap + Utils.getTimestamp() + "|call|" + who + "|" + Utils.sessionid;
-					System.out.println("Call request: " + request);
-					Utils.cmd.getOutputStream().write(request.getBytes());
-					Utils.callWith = who;
-					Utils.state = CallState.INIT;	
+				if (choice.equalsIgnoreCase("a"))
+				{//makes things easier that i don't have to always talk to myself to generate audio
 					
-					while(Utils.state != CallState.NONE)
-					{//don't show the menu if there's a call
-						System.out.println("Calling...");
-						synchronized(this)
-						{
-							wait();
-						}					
-					}
-				}
-				else if (choice.equals("ogg"))
-				{//almost the same as "mk". makes things easier that i don't have to get 2 cell phones going
+					//generate call request
 					System.out.print("Call who? ");
 					String who = Utils.kbBuffer.readLine();
 					String request = Utils.cap + Utils.getTimestamp() + "|call|" + who + "|" + Utils.sessionid;
 					System.out.println("Call request: " + request);
-					System.out.println("=========================IMPORTANT INFO=========================");
-					System.out.println("Ogg file MUST be stereo, 44100hz sample rate to match aclient's assumptions");
-					System.out.print("Ogg audio only file with vorbis encoding: ");
+					
+					//get audio file and bitrate to simulate realistic* voice data send rate
+					System.out.print("Audio file: ");
 					String filepath = Utils.kbBuffer.readLine();
 					filepath = filepath.replace("'", "").trim();
+					System.out.print("Audio file bit rate (kbps) to simulate more realistic data send rate: ");
+					String bitrate = Utils.kbBuffer.readLine();
+					int kbps = 0;
 					try
 					{
-						System.out.println("Using file: " + filepath + " for call audio");
-						Utils.ogg = new FileInputStream(filepath);
-						Utils.cmd.getOutputStream().write(request.getBytes());
-						Utils.callWith = who;
-						Utils.state = CallState.INIT;	
-						
-						while(Utils.state != CallState.NONE)
-						{//don't show the menu if there's a call
-							System.out.println("Calling...");
-							synchronized(this)
-							{
-								wait();
-							}					
-						}
-						Utils.ogg = null; //needed for CmdListener to distinguish which media writer... see CmdListener
-						
+						kbps = Integer.valueOf(bitrate);
 					}
-					catch (FileNotFoundException  | SecurityException ex)
+					catch(NumberFormatException n)
 					{
-						System.out.println("Can't read the file because it's not there or not allowed to");
+						n.printStackTrace();
+					}
+					Utils.bufferSize = (kbps+1)*1024 / 8; //a bit over is ok;
+					
+					//check for a realistic bitrate. if not realistic then the simulated data send rate is meaningless
+					if(kbps < 4 || kbps > 4096)
+					{
+						System.out.println("Bitrate is not realistic");
+					}
+					else
+					{
+						try
+						{
+							System.out.println("Using file: " + filepath + " for call audio");
+							Utils.audioFile = new FileInputStream(filepath);
+							Utils.cmd.getOutputStream().write(request.getBytes());
+							Utils.callWith = who;
+							Utils.state = CallState.INIT;	
+							
+							while(Utils.state != CallState.NONE)
+							{//don't show the menu if there's a call
+								System.out.println("Calling...");
+								synchronized(this)
+								{
+									wait();
+								}					
+							}
+							Utils.audioFile.close();
+							Utils.audioFile = null; //needed for CmdListener to distinguish which media writer... see CmdListener	
+						}
+						catch (FileNotFoundException  | SecurityException ex)
+						{
+							System.out.println("Can't read the file because it's not there or not allowed to");
+						}
 					}
 				}
-				else if (choice.equals("l"))
+				else if (choice.equalsIgnoreCase("l"))
 				{
 					System.out.print("Lookup user: ");
 					String who = Utils.kbBuffer.readLine();
@@ -181,14 +184,14 @@ public class Main implements Runnable
 					System.out.println("Lookup request: " + request);
 					Utils.cmd.getOutputStream().write(request.getBytes());
 				}
-				else if (choice.equals("q"))
+				else if (choice.equalsIgnoreCase("q"))
 				{
 					quit = true;
 					//cause all socket reading threads to die
 					Utils.cmd.close();
 					Utils.media.close();
 				}
-				else if (choice.equals("d"))
+				else if (choice.equalsIgnoreCase("d"))
 				{
 					System.out.println("Current timestamp: " + Utils.getTimestamp());
 					System.out.println("Current session id: " + Utils.sessionid);
@@ -196,7 +199,7 @@ public class Main implements Runnable
 					String raw = Utils.kbBuffer.readLine();
 					Utils.cmd.getOutputStream().write((Utils.cap + raw).getBytes());
 				}
-				else if (choice.equals("xx"))
+				else if (choice.equalsIgnoreCase("xx"))
 				{
 					System.out.println("Shutting down the call operator");
 					String stop = Utils.cap + Utils.getTimestamp() + "|suicide|a|b";

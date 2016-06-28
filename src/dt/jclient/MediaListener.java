@@ -7,6 +7,8 @@ import java.io.IOException;
 public class MediaListener implements Runnable
 {
 
+	private int counter = 1;
+	
 	@Override
 	public void run()
 	{
@@ -16,18 +18,7 @@ public class MediaListener implements Runnable
 			{//the async magic here... it will patiently wait until something comes in
 				byte[] mediaRaw = new byte[1024];
 				Utils.media.getInputStream().read(mediaRaw);				
-				String fromServer = new String(mediaRaw);
-				
-				//for cosmetic purposes don't show the G cap workaround
-				char char1 = fromServer.charAt(1);				
-				int char1val = Character.getNumericValue(char1);
-				
-				//cheap workaround for G cap
-				if(Utils.state == CallState.INCALL && char1val > -1)
-				{
-					System.out.println(Utils.callWith + " says: " + fromServer);
-				}
-				
+				System.out.println("Received media; counter: " + counter++);				
 			} 
 			catch (IOException e)
 			{
@@ -35,6 +26,6 @@ public class MediaListener implements Runnable
 				Utils.state = CallState.NONE; //media connection broke.... dropped call
 			}
 		}
-		System.out.println("Call finished. Media listener stopping.");
+		System.out.println("Media listener stopping.");
 	}
 }
