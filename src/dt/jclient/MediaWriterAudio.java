@@ -6,20 +6,19 @@ public class MediaWriterAudio implements Runnable
 {
 	private byte[] byteBuffer = new byte[Utils.bufferSize];
 	private int counter = 0;
-	
-	public MediaWriterAudio()
-	{
 
-	}
-	
 	@Override
 	public void run()
 	{		
-		System.out.println("Start sending audio");
-		while(Utils.state == CallState.INCALL)
+		try
 		{
-			try
+			System.out.println("Throwing out the amr header");
+			Utils.audioFile.read(new byte[6], 0, 6);
+			
+			System.out.println("Start sending audio");
+			while(Utils.state == CallState.INCALL)
 			{
+				
 				int read = Utils.audioFile.read(byteBuffer, 0, Utils.bufferSize);
 				Utils.media.getOutputStream().write(byteBuffer, 0, read);
 				System.out.println("wrote audio " + counter++);
@@ -34,11 +33,11 @@ public class MediaWriterAudio implements Runnable
 						//tell the server to end the call
 						String endit = Utils.cap + Utils.getTimestamp() + "|end|" + Utils.callWith + "|" + Utils.sessionid;
 						Utils.cmd.getOutputStream().write(endit.getBytes());
-						
+							
 						//set internals to no call state
 						Utils.callWith = Utils.nobody;
 						Utils.state = CallState.NONE;
-						
+							
 						//wake up the main menu thread after it's all done
 						synchronized(Utils.menu)
 						{
@@ -46,15 +45,16 @@ public class MediaWriterAudio implements Runnable
 						}
 					
 					}
-					
+						
 				}
-			} 
-			catch (IOException | InterruptedException e)
-			{
-				System.out.println("=========== SOMETHING BAD HAPPENED ==========");
-				e.printStackTrace();
+	
 			}
+			System.out.println("Media writer stopping");
+		} 
+		catch (IOException | InterruptedException e)
+		{
+			System.out.println("=========== SOMETHING BAD HAPPENED ==========");
+			e.printStackTrace();
 		}
-		System.out.println("Media writer stopping");
 	}
 }
