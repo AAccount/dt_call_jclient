@@ -26,7 +26,7 @@ public class MediaWriterAudio implements Runnable
 				if(read < Utils.bufferSize) //not enough bytes in the file to fill the buffer... must be the end of the file
 				{
 					System.out.println("End of the file");
-					System.out.print("Type quit to end the call");
+					System.out.print("Type quit to end the call: ");
 					String quit = Utils.kbBuffer.readLine();
 					if(quit.equalsIgnoreCase("quit"))
 					{
