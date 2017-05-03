@@ -125,7 +125,7 @@ public class Main implements Runnable
 					//generate call request
 					System.out.print("Call who? ");
 					String who = Utils.kbBuffer.readLine();
-					String request = Utils.cap + Utils.getTimestamp() + "|call|" + who + "|" + Utils.sessionid;
+					String request = Utils.getTimestamp() + "|call|" + who + "|" + Utils.sessionid;
 					System.out.println("Call request: " + request);
 					
 					//get audio file and bitrate to simulate realistic* voice data send rate
@@ -181,7 +181,7 @@ public class Main implements Runnable
 				{
 					System.out.print("Lookup user: ");
 					String who = Utils.kbBuffer.readLine();
-					String request = Utils.cap + Utils.getTimestamp() + "|lookup|" + who + "|" + Utils.sessionid;
+					String request = Utils.getTimestamp() + "|lookup|" + who + "|" + Utils.sessionid;
 					System.out.println("Lookup request: " + request);
 					Utils.cmd.getOutputStream().write(request.getBytes());
 				}
@@ -203,7 +203,7 @@ public class Main implements Runnable
 				else if (choice.equalsIgnoreCase("xx"))
 				{
 					System.out.println("Shutting down the call operator");
-					String stop = Utils.cap + Utils.getTimestamp() + "|suicide|a|b";
+					String stop = Utils.getTimestamp() + "|suicide|a|b";
 					System.out.println(stop);
 					Utils.cmd.getOutputStream().write(stop.getBytes());
 				}
