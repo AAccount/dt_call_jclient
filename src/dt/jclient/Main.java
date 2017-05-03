@@ -65,7 +65,6 @@ public class Main implements Runnable
 			Utils.media = Utils.mkSocket("localhost", 2014);
 			String associateMedia = Utils.getTimestamp() + "|" + Utils.sessionid;
 			Utils.media.getOutputStream().write(associateMedia.getBytes());
-			Utils.media.getOutputStream().write(Utils.cap.getBytes()); //sometimes java socket craps out
 		}
 		catch(IOException i)
 		{
@@ -196,7 +195,7 @@ public class Main implements Runnable
 					System.out.println("Current session id: " + Utils.sessionid);
 					System.out.println("> ");
 					String raw = Utils.kbBuffer.readLine();
-					Utils.cmd.getOutputStream().write((Utils.cap + raw).getBytes());
+					Utils.cmd.getOutputStream().write(raw.getBytes());
 				}
 				else if (choice.equalsIgnoreCase("xx"))
 				{

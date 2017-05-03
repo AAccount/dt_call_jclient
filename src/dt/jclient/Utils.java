@@ -23,7 +23,6 @@ import javax.net.ssl.X509TrustManager;
 public class Utils
 {	
 	//constants
-	public static final String cap = "D";
 	public static final String nobody = "(nobody)";
 	public static final String certPath = "/home/Daniel/Documents/untitled_folder/public.pem";
 	public static final String recordPath = "/home/Daniel/Documents/untitled_folder/";
