@@ -8,20 +8,10 @@ import java.io.InputStreamReader;
 public class CmdListener implements Runnable
 {
 	private boolean inputValid = false;
-	private BufferedReader txtin;
 	
 	public CmdListener ()
 	{
 		inputValid = true;
-		try
-		{
-			txtin = new BufferedReader(new InputStreamReader(Utils.cmd.getInputStream()));
-		} 
-		catch (IOException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 	
 	@Override
@@ -44,7 +34,10 @@ public class CmdListener implements Runnable
 			try
 			{//the async magic here... it will patiently wait until something comes in
 				
-				String fromServer = txtin.readLine();
+				byte[] responseRaw = new byte[Utils.bufferSize];
+				int length = Utils.cmd.getInputStream().read(responseRaw);
+				String fromServer = new String(responseRaw, 0, length);
+				
 				String[] respContents = fromServer.split("\\|");
 				System.out.println("Server response raw: " + fromServer);
 				

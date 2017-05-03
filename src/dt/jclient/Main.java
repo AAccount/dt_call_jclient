@@ -37,8 +37,9 @@ public class Main implements Runnable
 			
 			//read response
 			InputStream cmdin = Utils.cmd.getInputStream();
-			BufferedReader cmdTxtIn = new BufferedReader(new InputStreamReader(cmdin));
-			String loginresp = cmdTxtIn.readLine();
+			byte[] responseRaw = new byte[Utils.bufferSize];
+			int length = cmdin.read(responseRaw);
+			String loginresp = new String(responseRaw, 0, length);
 			System.out.println(loginresp);
 			
 			//process login response
@@ -63,7 +64,7 @@ public class Main implements Runnable
 			System.out.println("Established command socket with sessionid: " + Utils.sessionid);
 			
 			//establish media socket
-			Utils.media = Utils.mkSocket("localhost", 2001);
+			Utils.media = Utils.mkSocket("localhost", 2014);
 			String associateMedia = Utils.getTimestamp() + "|" + Utils.sessionid;
 			Utils.media.getOutputStream().write(associateMedia.getBytes());
 			Utils.media.getOutputStream().write(Utils.cap.getBytes()); //sometimes java socket craps out
