@@ -1,8 +1,6 @@
 package dt.jclient;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 
 //listens for incoming server data on the command socket
 public class CmdListener implements Runnable
@@ -99,7 +97,7 @@ public class CmdListener implements Runnable
 						if(accept.equals("accept"))
 						{
 							System.out.println("Accepting call with " + involved);
-							String acceptResp = Utils.cap + Utils.getTimestamp() + "|accept|" + involved + "|" + Utils.sessionid;
+							String acceptResp = Utils.getTimestamp() + "|accept|" + involved + "|" + Utils.sessionid;
 							Utils.cmd.getOutputStream().write(acceptResp.getBytes());
 							Utils.callWith = involved;
 							Utils.state = CallState.INIT;
@@ -107,7 +105,7 @@ public class CmdListener implements Runnable
 						else
 						{
 							System.out.println("Rejected call with " + involved);
-							String rejectResp = Utils.cap + Utils.getTimestamp() + "|reject|" + involved + "|" + Utils.sessionid;
+							String rejectResp = Utils.getTimestamp() + "|reject|" + involved + "|" + Utils.sessionid;
 							Utils.cmd.getOutputStream().write(rejectResp.getBytes());
 						}
 					}
