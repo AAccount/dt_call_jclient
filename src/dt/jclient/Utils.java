@@ -25,7 +25,7 @@ public class Utils
 	//constants
 	public static final String nobody = "(nobody)";
 	public static final String certPath = "/home/Daniel/Documents/untitled_folder/public.pem";
-	public static final String recordPath = "/home/Daniel/Documents/untitled_folder/";
+	public static final String recordPath = "/tmp/";
 	public static final byte[] amrHeader = new byte[] {0x23, 0x21, 0x41, 0x4D, 0x52, 0x0A}; //#!AMR(0x0A)
 	public static int bufferSize = 4096;
 	
