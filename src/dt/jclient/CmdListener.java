@@ -173,7 +173,7 @@ public class CmdListener implements Runnable
 							//there is no way to kill the thread but to stop the socket to cause an exception
 							//	restart after the exception
 							Utils.media.close();
-							Utils.media = Utils.mkSocket("localhost", 2001);
+							Utils.media = Utils.mkSocket("localhost", Utils.MEDIAPORT);
 							String associateMedia = Utils.getTimestamp() + "|" + Utils.sessionid;
 							Utils.media.getOutputStream().write(associateMedia.getBytes());
 						}
@@ -194,7 +194,7 @@ public class CmdListener implements Runnable
 							//there is no way to kill the thread but to stop the socket to cause an exception
 							//	restart after the exception
 							Utils.media.close();
-							Utils.media = Utils.mkSocket("localhost", 2001);
+							Utils.media = Utils.mkSocket("localhost", Utils.MEDIAPORT);
 							String associateMedia = Utils.getTimestamp() + "|" + Utils.sessionid;
 							Utils.media.getOutputStream().write(associateMedia.getBytes());
 						}

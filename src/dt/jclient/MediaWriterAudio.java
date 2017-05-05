@@ -10,6 +10,12 @@ public class MediaWriterAudio implements Runnable
 	@Override
 	public void run()
 	{		
+		if(Utils.audioFile == null)
+		{//you're only going to test either network read or write.
+			//if not writing then don't do this thread.
+			return;
+		}
+		
 		try
 		{
 			System.out.println("Throwing out the amr header");

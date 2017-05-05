@@ -28,7 +28,7 @@ public class Main implements Runnable
 		try
 		{
 			//send login command
-			Utils.cmd = Utils.mkSocket("localhost", 1991);
+			Utils.cmd = Utils.mkSocket("localhost", Utils.COMMANDPORT);
 			String login = Utils.getTimestamp() + "|login|" + uname + "|" + password;
 			Utils.cmd.getOutputStream().write(login.getBytes());
 	
@@ -62,7 +62,7 @@ public class Main implements Runnable
 			System.out.println("Established command socket with sessionid: " + Utils.sessionid);
 			
 			//establish media socket
-			Utils.media = Utils.mkSocket("localhost", 2014);
+			Utils.media = Utils.mkSocket("localhost", Utils.MEDIAPORT);
 			String associateMedia = Utils.getTimestamp() + "|" + Utils.sessionid;
 			Utils.media.getOutputStream().write(associateMedia.getBytes());
 		}
