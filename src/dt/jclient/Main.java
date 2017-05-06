@@ -108,6 +108,7 @@ public class Main implements Runnable
 				System.out.println("****************************");
 				System.out.println("Call simulator options");
 				System.out.println("a: Simulate a call using an audio file as voice data");
+				System.out.println("p: preset audio fill for incoming calls");
 				System.out.println("l: Lookup user");
 				System.out.println("q: quit");
 				System.out.println("d: direct command");
@@ -124,54 +125,35 @@ public class Main implements Runnable
 					String who = Utils.kbBuffer.readLine();
 					String request = Utils.getTimestamp() + "|call|" + who + "|" + Utils.sessionid;
 					System.out.println("Call request: " + request);
-					
-					//get audio file and bitrate to simulate realistic* voice data send rate
-					System.out.print("Audio file: ");
-					String filepath = Utils.kbBuffer.readLine();
-					filepath = filepath.replace("'", "").trim();
-					System.out.print("Audio file bit rate (kbps) to simulate more realistic data send rate: ");
-					String bitrate = Utils.kbBuffer.readLine();
-					int kbps = 0;
-					try
+
+					if(setAudioFile())
 					{
-						kbps = Integer.valueOf(bitrate);
+						Utils.cmd.getOutputStream().write(request.getBytes());
+						Utils.callWith = who;
+						Utils.state = CallState.INIT;	
+							
+						while(Utils.state != CallState.NONE)
+						{//don't show the menu if there's a call
+							System.out.println("Calling...");
+							synchronized(this)
+							{
+								wait();
+							}					
+						}
+						Utils.audioFile.close();
+						Utils.audioFile = null; //needed for CmdListener to distinguish which media writer... see CmdListener
 					}
-					catch(NumberFormatException n)
+
+				}
+				else if (choice.equalsIgnoreCase("p"))
+				{
+					if(setAudioFile())
 					{
-						n.printStackTrace();
-					}
-					Utils.bufferSize = (kbps+1)*1024 / 8; //a bit over is ok;
-					
-					//check for a realistic bitrate. if not realistic then the simulated data send rate is meaningless
-					if(kbps < 4 || kbps > 4096)
-					{
-						System.out.println("Bitrate is not realistic");
+						System.out.println("set audio file");
 					}
 					else
 					{
-						try
-						{
-							System.out.println("Using file: " + filepath + " for call audio");
-							Utils.audioFile = new FileInputStream(filepath);
-							Utils.cmd.getOutputStream().write(request.getBytes());
-							Utils.callWith = who;
-							Utils.state = CallState.INIT;	
-							
-							while(Utils.state != CallState.NONE)
-							{//don't show the menu if there's a call
-								System.out.println("Calling...");
-								synchronized(this)
-								{
-									wait();
-								}					
-							}
-							Utils.audioFile.close();
-							Utils.audioFile = null; //needed for CmdListener to distinguish which media writer... see CmdListener	
-						}
-						catch (FileNotFoundException  | SecurityException ex)
-						{
-							System.out.println("Can't read the file because it's not there or not allowed to");
-						}
+						System.out.println("problem setting audio file");
 					}
 				}
 				else if (choice.equalsIgnoreCase("l"))
@@ -217,6 +199,50 @@ public class Main implements Runnable
 		catch (IOException e) 
 		{
 			e.printStackTrace();
+		}
+	}
+	
+	private boolean setAudioFile()
+	{
+		
+		int kbps = 0;
+		String filepath = "";
+		try
+		{
+			//get audio file and bitrate to simulate realistic* voice data send rate
+			System.out.print("Audio file: ");
+			filepath = Utils.kbBuffer.readLine();
+			filepath = filepath.replace("'", "").trim();
+			System.out.print("Audio file bit rate (kbps) to simulate more realistic data send rate: ");
+			String bitrate = Utils.kbBuffer.readLine();
+			kbps = Integer.valueOf(bitrate);
+		}
+		catch(Exception n)
+		{
+			n.printStackTrace();
+			return false;
+		}
+		Utils.bufferSize = (kbps+1)*1024 / 8; //a bit over is ok;
+		
+		//check for a realistic bitrate. if not realistic then the simulated data send rate is meaningless
+		if(kbps < 4 || kbps > 4096)
+		{
+			System.out.println("Bitrate is not realistic");
+			return false;
+		}
+		else
+		{
+			try
+			{
+				System.out.println("Using file: " + filepath + " for call audio");
+				Utils.audioFile = new FileInputStream(filepath);
+				return true;
+			}
+			catch (FileNotFoundException  | SecurityException ex)
+			{
+				System.out.println("Can't read the file because it's not there or not allowed to");
+				return false;
+			}
 		}
 	}
 }
