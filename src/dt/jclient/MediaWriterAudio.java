@@ -44,6 +44,12 @@ public class MediaWriterAudio implements Runnable
 						Utils.callWith = Utils.nobody;
 						Utils.state = CallState.NONE;
 							
+						//kill the media listener
+						Utils.media.close();
+						Utils.media = Utils.mkSocket("localhost", Utils.MEDIAPORT);
+						String associateMedia = Utils.getTimestamp() + "|" + Utils.sessionid;
+						Utils.media.getOutputStream().write(associateMedia.getBytes());
+						
 						//wake up the main menu thread after it's all done
 						synchronized(Utils.menu)
 						{
