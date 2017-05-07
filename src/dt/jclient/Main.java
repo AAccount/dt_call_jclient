@@ -26,6 +26,8 @@ public class Main implements Runnable
 			uname = Utils.kbBuffer.readLine();
 			System.out.print("Private Key: ");
 			privateKeyPath = Utils.kbBuffer.readLine();
+			privateKeyPath = privateKeyPath.replace("'", "").trim();
+
 
 			//read the private key and convert to a string
 			File privateKeyFile = new File(privateKeyPath);
