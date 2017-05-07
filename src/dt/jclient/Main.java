@@ -1,25 +1,58 @@
 package dt.jclient;
 
+import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+
+import javax.crypto.Cipher;
+
+import com.sun.org.apache.xml.internal.security.utils.Base64;
 
 public class Main implements Runnable
 {
 
 	public static void main(String[] args) 
 	{
-		String uname, password;
+		String uname, privateKeyPath;
+		PrivateKey privateKey = null;
 		try
 		{
+			System.out.println("Java Client \"jClient\" for dtoperator");
 			System.out.print("User name: ");
 			uname = Utils.kbBuffer.readLine();
-			System.out.print("Password: ");
-			password = Utils.kbBuffer.readLine();
+			System.out.print("Private Key: ");
+			privateKeyPath = Utils.kbBuffer.readLine();
 
+			//read the private key and convert to a string
+			File privateKeyFile = new File(privateKeyPath);
+			FileInputStream privateKeyStream = new FileInputStream(privateKeyFile);
+			byte[] keyBytes = new byte[(int)privateKeyFile.length()];
+			privateKeyStream.read(keyBytes);
+			privateKeyStream.close();
+			
+			//chop of header and footer
+			String keyString = new String(keyBytes);
+			int beforeTrimLength = keyString.length();
+			keyString = keyString.replace("-----BEGIN PRIVATE KEY-----\n", "");
+			keyString = keyString.replace("-----END PRIVATE KEY-----", "");
+			if(keyString.length() == beforeTrimLength)
+			{//make sure the private key is extracted out of the openssl genrsa output
+				System.err.println("Private key is improperly formatted.");
+				System.err.println("Make sure you did: openssl pkcs8 -topk8 -nocrypt -in righthand.pem -out righthand_private.pem");
+				return;
+			}
+			
+			//actually turn the file into a key
+			com.sun.org.apache.xml.internal.security.Init.init();
+			byte[] keyDecoded = Base64.decode(keyString);
+			KeyFactory kf = KeyFactory.getInstance("RSA");
+			privateKey = kf.generatePrivate(new PKCS8EncodedKeySpec(keyDecoded));
 		} 
-		catch (IOException e2)
+		catch (Exception e2)
 		{
 			e2.printStackTrace();
 			return;
@@ -27,38 +60,66 @@ public class Main implements Runnable
 		
 		try
 		{
-			//send login command
+			//request login challenge
 			Utils.cmd = Utils.mkSocket("localhost", Utils.COMMANDPORT);
-			String login = Utils.getTimestamp() + "|login|" + uname + "|" + password;
+			String login = Utils.getTimestamp() + "|login1|" + uname;
 			Utils.cmd.getOutputStream().write(login.getBytes());
-	
 			
-			//read response
+			//read in login challenge
 			InputStream cmdin = Utils.cmd.getInputStream();
-			byte[] responseRaw = new byte[Utils.bufferSize];
-			int length = cmdin.read(responseRaw);
-			String loginresp = new String(responseRaw, 0, length);
-			System.out.println(loginresp);
+			byte[] loginChallengeBuffer = new byte[Utils.bufferSize];
+			int length = cmdin.read(loginChallengeBuffer);
+			String loginChallenge = new String(loginChallengeBuffer, 0, length);
+			System.out.println(loginChallenge);
 			
-			//process login response
-			String[] respContents = loginresp.split("\\|");
-			if(respContents.length != 4)
+			//process login challenge response
+			String[] loginChallengeContents = loginChallenge.split("\\|");
+			if(loginChallengeContents.length != 4)
 			{
 				System.out.println("Server response imporoperly formatted");
 				return; //not a legitimate server response
 			}
-			if(!(respContents[1].equals("resp") && respContents[2].equals("login")))
+			if(!(loginChallengeContents[1].equals("resp") && loginChallengeContents[2].equals("login1")))
 			{
 				System.out.println("Server response CONTENTS imporperly formateed");
 				return; //server response doesn't make sense
 			}
-			long ts = Long.valueOf(respContents[0]);
-			if(!Utils.validTS(ts))
+			
+			//get the challenge
+			String challenge = loginChallengeContents[3];
+			System.out.println("This time's challenge: " + challenge);
+			
+			//the the challenge string of #s into actual #s
+			byte[] challengeNumbers = destringify(challenge);
+			
+			//answer the challenge
+			Cipher rsa = Cipher.getInstance("RSA"); //using default padding mode in server to keep java happy
+			rsa.init(Cipher.DECRYPT_MODE, privateKey);
+			byte[] decrypted = rsa.doFinal(challengeNumbers);
+			String challengeDec = new String(decrypted, "UTF8");
+			System.out.println("Today's challenge turns into this gibberish: " + challengeDec);
+			String loginChallengeResponse = Utils.getTimestamp() + "|login2|" + uname + "|" + challengeDec;
+			Utils.cmd.getOutputStream().write(loginChallengeResponse.getBytes());
+			
+			//see if the server liked the challenge response
+			byte[] answerResponseBuffer = new byte[Utils.bufferSize];
+			length = cmdin.read(answerResponseBuffer);
+			String answerResponse = new String(answerResponseBuffer, 0, length);
+			System.out.println(answerResponse);
+			
+			//check reaction response
+			String[] answerResponseContents = answerResponse.split("\\|");
+			if(answerResponseContents.length != 4)
 			{
-				System.out.println("Server had an unacceptable timestamp");
-				return;
+				System.out.println("Server response imporoperly formatted");
+				return; //not a legitimate server response
 			}
-			Utils.sessionid = Long.valueOf(respContents[3]);
+			if(!(answerResponseContents[1].equals("resp") && answerResponseContents[2].equals("login2")))
+			{
+				System.out.println("Server response CONTENTS imporperly formateed");
+				return; //server response doesn't make sense
+			}
+			Utils.sessionid = Long.valueOf(answerResponseContents[3]);
 			System.out.println("Established command socket with sessionid: " + Utils.sessionid);
 			
 			//establish media socket
@@ -66,16 +127,17 @@ public class Main implements Runnable
 			String associateMedia = Utils.getTimestamp() + "|" + Utils.sessionid;
 			Utils.media.getOutputStream().write(associateMedia.getBytes());
 		}
-		catch(IOException i)
-		{
-			i.printStackTrace();
-			return;
-		}
 		catch (NullPointerException n)
 		{
 			System.out.println("Server kicked jclient out.");
 			return;
 		}
+		catch(Exception i)
+		{
+			i.printStackTrace();
+			return;
+		}
+		
 			
 		//start listening for server responses on the command thread
 		CmdListener cmdListener = new CmdListener();
@@ -140,8 +202,6 @@ public class Main implements Runnable
 								wait();
 							}					
 						}
-						Utils.audioFile.close();
-						Utils.audioFile = null; //needed for CmdListener to distinguish which media writer... see CmdListener
 					}
 
 				}
@@ -235,14 +295,30 @@ public class Main implements Runnable
 			try
 			{
 				System.out.println("Using file: " + filepath + " for call audio");
-				Utils.audioFile = new FileInputStream(filepath);
+				FileInputStream test = new FileInputStream(filepath);
+				test.close();
+				Utils.audioFile = filepath;
+				
 				return true;
 			}
-			catch (FileNotFoundException  | SecurityException ex)
+			catch (SecurityException | IOException ex)
 			{
 				System.out.println("Can't read the file because it's not there or not allowed to");
 				return false;
 			}
 		}
+	}
+	
+	//turn a string of #s into actual #s assuming the string is a bunch of
+	//	3 digit #s glued to each other. also turned unsigned #s into signed #s
+	static private byte[] destringify(String numbers)
+	{
+		byte[] result = new byte[(int)(numbers.length()/3)];
+		for(int i=0; i<numbers.length(); i=i+3)
+		{
+			String digit = numbers.substring(i, i+3);
+			result[(int)(i/3)] = (byte)(0xff & Integer.valueOf(digit));
+		}
+		return result;
 	}
 }
