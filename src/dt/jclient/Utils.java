@@ -42,7 +42,7 @@ public class Utils
 	//session call variables
 	public static CallState state= CallState.NONE;
 	public static String callWith = nobody;
-	public static FileInputStream audioFile = null;
+	public static String audioFile = null;
 	public static Main menu;
 	public static BufferedReader kbBuffer = new BufferedReader(new InputStreamReader(System.in));
 

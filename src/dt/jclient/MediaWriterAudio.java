@@ -1,5 +1,6 @@
 package dt.jclient;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 
 public class MediaWriterAudio implements Runnable
@@ -19,13 +20,14 @@ public class MediaWriterAudio implements Runnable
 		try
 		{
 			System.out.println("Throwing out the amr header");
-			Utils.audioFile.read(new byte[6], 0, 6);
+			FileInputStream audioFile = new FileInputStream(Utils.audioFile);
+			audioFile.read(new byte[6], 0, 6);
 			
 			System.out.println("Start sending audio");
 			while(Utils.state == CallState.INCALL)
 			{
 				
-				int read = Utils.audioFile.read(byteBuffer, 0, Utils.bufferSize);
+				int read = audioFile.read(byteBuffer, 0, Utils.bufferSize);
 				Utils.media.getOutputStream().write(byteBuffer, 0, read);
 				System.out.println("wrote audio " + counter++);
 				Thread.sleep(1000); //simulate live audio encoding which will have the bytes only as fast as the bitrate
@@ -62,6 +64,7 @@ public class MediaWriterAudio implements Runnable
 	
 			}
 			System.out.println("Media writer stopping");
+			audioFile.close();
 		} 
 		catch (IOException | InterruptedException e)
 		{
