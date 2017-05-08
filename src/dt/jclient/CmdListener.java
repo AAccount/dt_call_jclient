@@ -204,11 +204,11 @@ public class CmdListener implements Runnable
 						System.out.println("Erroneous call command: " + fromServer);
 					}
 				}
-				else if(serverCommand.equals("resp"))
+				else if(serverCommand.equals("lookup"))
 				{
-					String from = respContents[2];
-					String value = respContents[3];
-					System.out.println("Response of: " + from + " --> " + value);
+					String account = respContents[2];
+					String status = respContents[3];
+					System.out.println("Status of account " + account + ": " + status);
 				}
 				else
 				{
