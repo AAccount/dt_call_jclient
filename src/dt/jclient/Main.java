@@ -69,7 +69,7 @@ public class Main implements Runnable
 			
 			//read in login challenge
 			InputStream cmdin = Utils.cmd.getInputStream();
-			byte[] loginChallengeBuffer = new byte[Utils.bufferSize];
+			byte[] loginChallengeBuffer = new byte[Utils.FOURK];
 			int length = cmdin.read(loginChallengeBuffer);
 			String loginChallenge = new String(loginChallengeBuffer, 0, length);
 			System.out.println(loginChallenge);
@@ -104,7 +104,7 @@ public class Main implements Runnable
 			Utils.cmd.getOutputStream().write(loginChallengeResponse.getBytes());
 			
 			//see if the server liked the challenge response
-			byte[] answerResponseBuffer = new byte[Utils.bufferSize];
+			byte[] answerResponseBuffer = new byte[Utils.FOURK];
 			length = cmdin.read(answerResponseBuffer);
 			String answerResponse = new String(answerResponseBuffer, 0, length);
 			System.out.println(answerResponse);
@@ -284,7 +284,7 @@ public class Main implements Runnable
 			n.printStackTrace();
 			return false;
 		}
-		Utils.bufferSize = (kbps+1)*1024 / 8; //a bit over is ok;
+		Utils.mediaChunkSize = (kbps+1)*1024 /8 /50; //a bit over is ok;
 		
 		//check for a realistic bitrate. if not realistic then the simulated data send rate is meaningless
 		if(kbps < 4 || kbps > 4096)

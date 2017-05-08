@@ -32,7 +32,7 @@ public class CmdListener implements Runnable
 			try
 			{//the async magic here... it will patiently wait until something comes in
 				
-				byte[] responseRaw = new byte[Utils.bufferSize];
+				byte[] responseRaw = new byte[Utils.FOURK];
 				int length = Utils.cmd.getInputStream().read(responseRaw);
 				String fromServer = new String(responseRaw, 0, length);
 				

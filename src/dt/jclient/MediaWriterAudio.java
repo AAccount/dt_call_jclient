@@ -5,7 +5,7 @@ import java.io.IOException;
 
 public class MediaWriterAudio implements Runnable
 {
-	private byte[] byteBuffer = new byte[Utils.bufferSize];
+	private byte[] byteBuffer = new byte[Utils.mediaChunkSize];
 	private int counter = 0;
 
 	@Override
@@ -27,11 +27,11 @@ public class MediaWriterAudio implements Runnable
 			while(Utils.state == CallState.INCALL)
 			{
 				
-				int read = audioFile.read(byteBuffer, 0, Utils.bufferSize);
+				int read = audioFile.read(byteBuffer, 0, Utils.mediaChunkSize);
 				Utils.media.getOutputStream().write(byteBuffer, 0, read);
 				System.out.println("wrote audio " + counter++);
-				Thread.sleep(1000); //simulate live audio encoding which will have the bytes only as fast as the bitrate
-				if(read < Utils.bufferSize) //not enough bytes in the file to fill the buffer... must be the end of the file
+				Thread.sleep(20); //simulate live audio encoding which will have the bytes only as fast as the bitrate
+				if(read < Utils.mediaChunkSize) //not enough bytes in the file to fill the buffer... must be the end of the file
 				{
 					System.out.println("End of the file");
 					System.out.print("Type quit to end the call: ");
