@@ -36,7 +36,7 @@ public class Utils
 	public static final int MEDIAPORT = 2014;
 	
 	//session information
-	public static long sessionid;
+	public static String sessionid;
 	public static int retry = 0;
 	//session sockets
 	public static Socket cmd = null;

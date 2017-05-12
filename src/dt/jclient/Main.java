@@ -121,7 +121,7 @@ public class Main implements Runnable
 				System.out.println("Server response CONTENTS imporperly formateed");
 				return; //server response doesn't make sense
 			}
-			Utils.sessionid = Long.valueOf(answerResponseContents[3]);
+			Utils.sessionid = answerResponseContents[3];
 			System.out.println("Established command socket with sessionid: " + Utils.sessionid);
 			
 			//establish media socket

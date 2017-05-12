@@ -180,8 +180,8 @@ public class CmdListener implements Runnable
 					}
 					else if(subCommand.equals("drop"))
 					{
-						long servSession = Long.valueOf(respContents[3]);
-						if(servSession == Utils.sessionid)
+						String servSession = respContents[3];
+						if(servSession.equals(Utils.sessionid))
 						{
 							System.out.println("Call with " + Utils.callWith + " was dropped");
 							Utils.callWith = Utils.nobody;
