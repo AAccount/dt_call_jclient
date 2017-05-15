@@ -178,27 +178,6 @@ public class CmdListener implements Runnable
 							Utils.media.getOutputStream().write(associateMedia.getBytes());
 						}
 					}
-					else if(subCommand.equals("drop"))
-					{
-						String servSession = respContents[3];
-						if(servSession.equals(Utils.sessionid))
-						{
-							System.out.println("Call with " + Utils.callWith + " was dropped");
-							Utils.callWith = Utils.nobody;
-							Utils.state = CallState.NONE;
-							synchronized(Utils.menu)
-							{
-								Utils.menu.notify(); //dropped call == call end
-							}
-							
-							//there is no way to kill the thread but to stop the socket to cause an exception
-							//	restart after the exception
-							Utils.media.close();
-							Utils.media = Utils.mkSocket("localhost", Utils.MEDIAPORT);
-							String associateMedia = Utils.getTimestamp() + "|" + Utils.sessionid;
-							Utils.media.getOutputStream().write(associateMedia.getBytes());
-						}
-					}
 					else
 					{
 						System.out.println("Erroneous call command: " + fromServer);

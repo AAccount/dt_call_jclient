@@ -38,10 +38,6 @@ public class MediaWriterAudio implements Runnable
 					String quit = Utils.kbBuffer.readLine();
 					if(quit.equalsIgnoreCase("quit"))
 					{
-						//tell the server to end the call
-						String endit = Utils.getTimestamp() + "|end|" + Utils.callWith + "|" + Utils.sessionid;
-						Utils.cmd.getOutputStream().write(endit.getBytes());
-							
 						//set internals to no call state
 						Utils.callWith = Utils.nobody;
 						Utils.state = CallState.NONE;
