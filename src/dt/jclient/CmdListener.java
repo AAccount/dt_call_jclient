@@ -91,18 +91,19 @@ public class CmdListener implements Runnable
 					}
 					else if(subCommand.equals("incoming"))
 					{
+						Utils.callWith = involved;
+						Utils.state = CallState.INIT;
+						
 						System.out.println("Incoming call from: " + involved);
 						System.out.println("accept or reject?");
-						String accept = Utils.kbBuffer.readLine();
-						if(accept.equals("accept"))
+						String choice = Utils.kbBuffer.readLine();
+						if(choice.equals("accept"))
 						{
 							System.out.println("Accepting call with " + involved);
 							String acceptResp = Utils.getTimestamp() + "|accept|" + involved + "|" + Utils.sessionid;
 							Utils.cmd.getOutputStream().write(acceptResp.getBytes());
-							Utils.callWith = involved;
-							Utils.state = CallState.INIT;
 						}
-						else
+						else if(choice.equals("reject"))
 						{
 							System.out.println("Rejected call with " + involved);
 							String rejectResp = Utils.getTimestamp() + "|reject|" + involved + "|" + Utils.sessionid;
