@@ -32,6 +32,7 @@ public class Utils
 	public static int mediaChunkSize = FOURK;
 	
 	//ports
+	public static final String HOST = "localhost";
 	public static final int COMMANDPORT = 1991;
 	public static final int MEDIAPORT = 2014;
 	
